@@ -89,12 +89,17 @@ bool process_key_mapping(int mapping_index) {
     }
 }
 
+/* 利用例
+#include "qmk_us_to_jp_keymap.c"
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     if (record->event.pressed) {
+        // ==== ↓追加 ====
         int index = find_key_mapping_index(keycode);
         if (index >= 0) {
             return process_key_mapping(index);
         }
+        // ==== ↑追加 ====
 
         switch (keycode) {
           //  .....
@@ -103,4 +108,4 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
     return true; // # 他の処理を継続
 }
-
+*/
