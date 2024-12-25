@@ -1,5 +1,5 @@
 
-// QMK用のUS→JPキーマップサンプルコード
+// QMK用のUS→JPキーマップ変換
 
 typedef struct {
     bool is_shift_required;
