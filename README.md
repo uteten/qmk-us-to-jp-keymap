@@ -45,15 +45,19 @@ USキーボードのキーをJPキーボードさせた際に、以下の変換�
 
 ## 使用方法
 
-以下のコードを参考に、US→JPのキーマッピングを実装してください。
+`qmk_us_to_jp_keymap.c` をincludeし以下の行を `process_record_user` 関数内に以下を追加します
+   ```c
+   if (!convert_us_to_jp_keymap(keycode)) return false;
+   ```
+
+## 例: 追記後のコード
 
 ```c
 #include "qmk_us_to_jp_keymap.c"  // US→JPキー変換用のヘッダーをインクルード
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     if (record->event.pressed) {
-        // ↓↓↓ 追加部分: US→JPキー変換を実行 ↓↓↓
-        if (!convert_us_to_jp_keymap(keycode)) return false; // 変換実行時はここで処理を終了
+        if (!convert_us_to_jp_keymap(keycode)) return false; // 変換実行時は処理を終了
 
         // 他のカスタム処理をここに記述
         switch (keycode) {
