@@ -48,19 +48,16 @@ USキーボードのキーをJPキーボードさせた際に、以下の変換�
 以下のコードを参考に、US→JPのキーマッピングを実装してください。
 
 ```c
-#include "qmk_us_to_jp_keymap.c"
+#include "qmk_us_to_jp_keymap.c"  // US→JPキー変換用のヘッダーをインクルード
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     if (record->event.pressed) {
-        // ==== ↓追加 ==== 
-        int index = find_key_mapping_index(keycode);
-        if (index >= 0) {
-            return process_key_mapping(index);
-        }
-        // ==== ↑追加 ====
+        // ↓↓↓ 追加部分: US→JPキー変換を実行 ↓↓↓
+        if (!convert_us_to_jp_keymap(keycode)) return false; // 変換実行時はここで処理を終了
 
+        // 他のカスタム処理をここに記述
         switch (keycode) {
-            // 他のカスタム処理をここに記述
+            // カスタムキーコードの処理
         }
     }
 
