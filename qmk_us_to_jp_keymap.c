@@ -45,9 +45,9 @@ const KeyMappingEntry us_to_jp_keymap[] = {
     {KC_MINS, {{false, KC_NO},   {true,  KC_INT1}}},
     {KC_SCLN, {{false, KC_NO},   {false, KC_QUOT}}},
     {KC_EQL,  {{true,  KC_MINS}, {true,  KC_SCLN}}},
-    {KC_LBRC, {{false, KC_RBRC}, {true, KC_RBRC}}},
-    {KC_RBRC, {{false, KC_BSLS}, { true, KC_BSLS}}},
-    {KC_BSLS, {{false, KC_INT3}, {true, KC_INT3}}},
+    {KC_LBRC, {{false, KC_RBRC}, {true,  KC_RBRC}}},
+    {KC_RBRC, {{false, KC_BSLS}, {true,  KC_BSLS}}},
+    {KC_BSLS, {{false, KC_INT3}, {true,  KC_INT3}}},
     {KC_QUOT, {{false, KC_COMM}, {true,  KC_2}}},
     {KC_GRV,  {{true,  KC_LBRC}, {true,  KC_EQL}}},
 };
@@ -116,4 +116,5 @@ bool convert_us_to_jp_keymap(uint16_t keycode) {
     if (mapping_index >= 0) {
         return process_key_mapping(mapping_index);
     }
-    return true; // 他の処理を継n         
+    return true;
+}
