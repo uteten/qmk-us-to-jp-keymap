@@ -15,12 +15,12 @@ USキーボードのキーをJPキーボードさせた際に、以下の変換�
 | `0`     | 変換不要       | Shift + `)`   |                          |
 | `-`     | 変換不要       | Shift + 国際キー1 |                          |
 | `;`     | 変換不要       | `'`           | Shiftを解除する必要がある   |
-| `=`     | `-`        | Shift + `;`   |                          |
-| `[`     | `]`        | Shift + `]`   |                          |
-| `]`     | `\`        | Shift + `\`   |                          |
-| `\`     | 国際キー3      | Shift + 国際キー3 |                          |
-| `'`     | `,`        | Shift + `2`   |                          |
-| `` ` `` | `[`        | Shift + `=`   |                          |
+| `=`     | `-`           | Shift + `;`   |                          |
+| `[`     | `]`           | Shift + `]`   |                          |
+| `]`     | `\`           | Shift + `\`   |                          |
+| `\`     | 国際キー3      | Shift + 国際キー3 |                       |
+| `'`     | Shift + `7`   | Shift + `2`   |                          |
+| `` ` `` | `[`           | Shift + `=`   |                          |
 
 ### KeyMappingEntry (KC_コード表記)
 
@@ -40,7 +40,7 @@ USキーボードのキーをJPキーボードさせた際に、以下の変換�
 | `KC_LBRC`   | `KC_RBRC`            | `KC_RBRC` (Shift)    |
 | `KC_RBRC`   | `KC_BSLS`            | `KC_BSLS` (Shift)    |
 | `KC_BSLS`   | `KC_INT3`            | `KC_INT3` (Shift)    |
-| `KC_QUOT`   | `KC_COMM`            | `KC_2` (Shift)       |
+| `KC_QUOT`   | `KC_7` (Shift)       | `KC_2` (Shift)       |
 | `KC_GRV`    | `KC_LBRC` (Shift)    | `KC_EQL` (Shift)     |
 
 ## 使用方法
