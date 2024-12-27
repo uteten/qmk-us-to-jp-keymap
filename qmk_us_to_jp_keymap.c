@@ -48,7 +48,7 @@ const KeyMappingEntry us_to_jp_keymap[] = {
     {KC_LBRC, {{false, KC_RBRC}, {true,  KC_RBRC}}},
     {KC_RBRC, {{false, KC_BSLS}, {true,  KC_BSLS}}},
     {KC_BSLS, {{false, KC_INT3}, {true,  KC_INT3}}},
-    {KC_QUOT, {{false, KC_COMM}, {true,  KC_2}}},
+    {KC_QUOT, {{true,  KC_7},    {true,  KC_2}}},
     {KC_GRV,  {{true,  KC_LBRC}, {true,  KC_EQL}}},
 };
 
