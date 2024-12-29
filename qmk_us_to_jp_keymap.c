@@ -3,17 +3,18 @@
  * @brief US配列キーボードのキーコードをJP配列キーボードのキーコードに変換するためのマッピング処理を実装したファイルです。
  *
  * ## 利用方法:
- * 以下のように、`process_record_user` 関数内に組み込んで使用します。
+ * keymap.cで`#include "qmk_us_to_jp_keymap.c"`して
+ * `process_record_user` 関数内の先頭に`if (!convert_us_to_jp_keymap(keycode,record->event.pressed)) return false;`を追記
  *
  * @code
  * #include "qmk_us_to_jp_keymap.c"  // US→JPキー変換用のヘッダーをインクルード
  *
  * bool process_record_user(uint16_t keycode, keyrecord_t *record) {
- *     if (record->event.pressed) {
- *         // US→JPキー変換を実行。変換された場合はここで処理を終了
- *         if (!convert_us_to_jp_keymap(keycode)) return false;
+ *     // US→JPキー変換を実行。変換された場合はここで処理を終了
+ *     if (!convert_us_to_jp_keymap(keycode,record->event.pressed)) return false;
  *
- *         // その他のキー処理を記述
+ *     // その他のキー処理を記述
+ *     if (record->event.pressed) {
  *         switch (keycode) {
  *             // ...
  *         }
@@ -64,18 +65,39 @@ int find_key_mapping_index(uint16_t keycode) {
     return -1; // Mapping not found
 }
 
-bool process_key_mapping(int mapping_index) {
+uint16_t pending_unregister_key = 0;
+uint16_t pending_unregister_shift_key = 0;
+uint16_t pending_register_shift_key = 0;
+
+void reset_pending_keys(void) {
+    if (pending_unregister_key) {
+        unregister_code(pending_unregister_key);
+        pending_unregister_key = 0;
+    }
+    if (pending_unregister_shift_key) {
+        unregister_code(pending_unregister_shift_key);
+        pending_unregister_shift_key = 0;
+    }
+    if (pending_register_shift_key) {
+        register_code(pending_register_shift_key);
+        pending_register_shift_key = 0;
+    }
+}
+
+bool process_key_mapping(int mapping_index,bool pressed) {
+    reset_pending_keys();
+    if (!pressed) {
+        return true;
+    }
     if (mapping_index < 0 || mapping_index >= us_to_jp_keymap_count) return true;
 
     uint16_t current_shift_key = 0;
     uint16_t mapped_keycode = KC_NO;
-
     if (keyboard_report->mods & MOD_BIT(KC_LSFT)) {
         current_shift_key = KC_LSFT;
     } else if (keyboard_report->mods & MOD_BIT(KC_RSFT)) {
         current_shift_key = KC_RSFT;
     }
-
     if (current_shift_key) {
         // Shift is pressed
         mapped_keycode = us_to_jp_keymap[mapping_index].target_mappings[1].keycode;
@@ -83,38 +105,37 @@ bool process_key_mapping(int mapping_index) {
             return true; // No mapping required
         } else if (us_to_jp_keymap[mapping_index].target_mappings[1].is_shift_required) {
             register_code(mapped_keycode);
-            unregister_code(mapped_keycode);
+            pending_unregister_key = mapped_keycode;
         } else {
             unregister_code(current_shift_key);
             register_code(mapped_keycode);
-            unregister_code(mapped_keycode);
-            register_code(current_shift_key);
+            pending_register_shift_key = current_shift_key;
+            pending_unregister_key = mapped_keycode;
         }
         return false;
+
     } else {
         // Shift is not pressed
         mapped_keycode = us_to_jp_keymap[mapping_index].target_mappings[0].keycode;
         if (mapped_keycode == KC_NO) {
             return true; // No mapping required
+        } else if (us_to_jp_keymap[mapping_index].target_mappings[0].is_shift_required) {
+            register_code(KC_LSFT);
+            register_code(mapped_keycode);
+            pending_unregister_key = mapped_keycode;
+            pending_unregister_shift_key = KC_LSFT;
         } else {
-            if (us_to_jp_keymap[mapping_index].target_mappings[0].is_shift_required) {
-                register_code(KC_LSFT);
-                register_code(mapped_keycode);
-                unregister_code(mapped_keycode);
-                unregister_code(KC_LSFT);
-            } else {
-                register_code(mapped_keycode);
-                unregister_code(mapped_keycode);
-            }
-            return false;
+            register_code(mapped_keycode);
+            pending_unregister_key = mapped_keycode;
         }
+        return false;
     }
 }
 
-bool convert_us_to_jp_keymap(uint16_t keycode) {
+bool convert_us_to_jp_keymap(uint16_t keycode, bool pressed) {
     int mapping_index = find_key_mapping_index(keycode);
     if (mapping_index >= 0) {
-        return process_key_mapping(mapping_index);
+        return process_key_mapping(mapping_index, pressed);
     }
     return true;
 }
