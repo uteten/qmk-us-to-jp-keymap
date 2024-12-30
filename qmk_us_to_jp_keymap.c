@@ -1,27 +1,6 @@
 /**
  * @file us_to_jp_keymap.c
  * @brief US配列キーボードのキーコードをJP配列キーボードのキーコードに変換するためのマッピング処理を実装したファイルです。
- *
- * ## 利用方法:
- * keymap.cで`#include "qmk_us_to_jp_keymap.c"`して
- * `process_record_user` 関数内の先頭に`if (!convert_us_to_jp_keymap(keycode,record->event.pressed)) return false;`を追記
- *
- * @code
- * #include "qmk_us_to_jp_keymap.c"  // US→JPキー変換用のヘッダーをインクルード
- *
- * bool process_record_user(uint16_t keycode, keyrecord_t *record) {
- *     // US→JPキー変換を実行。変換された場合はここで処理を終了
- *     if (!convert_us_to_jp_keymap(keycode,record->event.pressed)) return false;
- *
- *     // その他のキー処理を記述
- *     if (record->event.pressed) {
- *         switch (keycode) {
- *             // ...
- *         }
- *     }
- *     return true; // 他の処理を継続
- * }
- * @endcode
  */
 
 typedef struct {
@@ -66,30 +45,36 @@ int find_key_mapping_index(uint16_t keycode) {
 }
 
 uint16_t pending_unregister_key = 0;
+uint16_t last_handled_keycode = 0;
+
 uint16_t pending_unregister_shift_key = 0;
 uint16_t pending_register_shift_key = 0;
 
-void reset_pending_keys(void) {
-    if (pending_unregister_key) {
-        unregister_code(pending_unregister_key);
-        pending_unregister_key = 0;
+void reset_pending_keys(uint16_t keycode, bool pressed) {
+    if (keycode == pending_register_shift_key && !pressed) {
+        pending_register_shift_key =0;
     }
-    if (pending_unregister_shift_key) {
-        unregister_code(pending_unregister_shift_key);
-        pending_unregister_shift_key = 0;
+    if (keycode == pending_unregister_shift_key && pressed) {
+            pending_unregister_shift_key = 0;
     }
-    if (pending_register_shift_key) {
-        register_code(pending_register_shift_key);
-        pending_register_shift_key = 0;
+    if (keycode == last_handled_keycode && !pressed) {
+        if (pending_unregister_key) {
+            unregister_code(pending_unregister_key);
+            pending_unregister_key = 0;
+        }
+        if (pending_unregister_shift_key) {
+            unregister_code(pending_unregister_shift_key);
+            pending_unregister_shift_key = 0;
+        }
+        if (pending_register_shift_key) {
+            register_code(pending_register_shift_key);
+            pending_register_shift_key = 0;
+        }
     }
 }
 
-bool process_key_mapping(int mapping_index,bool pressed) {
-    reset_pending_keys();
-    if (!pressed) {
-        return true;
-    }
-    if (mapping_index < 0 || mapping_index >= us_to_jp_keymap_count) return true;
+bool process_key_mapping(int mapping_index,uint16_t keycode, bool pressed) {
+    if (!pressed || mapping_index < 0 || mapping_index >= us_to_jp_keymap_count) return true;
 
     uint16_t current_shift_key = 0;
     uint16_t mapped_keycode = KC_NO;
@@ -112,7 +97,6 @@ bool process_key_mapping(int mapping_index,bool pressed) {
             pending_register_shift_key = current_shift_key;
             pending_unregister_key = mapped_keycode;
         }
-        return false;
 
     } else {
         // Shift is not pressed
@@ -128,14 +112,16 @@ bool process_key_mapping(int mapping_index,bool pressed) {
             register_code(mapped_keycode);
             pending_unregister_key = mapped_keycode;
         }
-        return false;
     }
+    last_handled_keycode = keycode;
+    return false;
 }
 
 bool convert_us_to_jp_keymap(uint16_t keycode, bool pressed) {
+    reset_pending_keys(keycode, pressed);
     int mapping_index = find_key_mapping_index(keycode);
     if (mapping_index >= 0) {
-        return process_key_mapping(mapping_index, pressed);
+        return process_key_mapping(mapping_index, keycode, pressed);
     }
     return true;
 }
