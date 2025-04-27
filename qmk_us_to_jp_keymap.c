@@ -52,7 +52,7 @@ uint16_t pending_register_shift_key = 0;
 
 void reset_pending_keys(uint16_t keycode, bool pressed) {
     if (keycode == pending_register_shift_key && !pressed) {
-        pending_register_shift_key =0;
+        pending_register_shift_key = 0;
     }
     if (keycode == pending_unregister_shift_key && pressed) {
             pending_unregister_shift_key = 0;
@@ -75,12 +75,12 @@ void reset_pending_keys(uint16_t keycode, bool pressed) {
 
 bool process_key_mapping(int mapping_index,uint16_t keycode, bool pressed) {
     if (!pressed || mapping_index < 0 || mapping_index >= us_to_jp_keymap_count) return true;
-
     uint16_t current_shift_key = 0;
     uint16_t mapped_keycode = KC_NO;
-    if (keyboard_report->mods & MOD_BIT(KC_LSFT)) {
+    uint8_t mods = get_mods();
+    if (mods & MOD_BIT(KC_LSFT)) {
         current_shift_key = KC_LSFT;
-    } else if (keyboard_report->mods & MOD_BIT(KC_RSFT)) {
+    } else if (mods & MOD_BIT(KC_RSFT)) {
         current_shift_key = KC_RSFT;
     }
     if (current_shift_key) {
